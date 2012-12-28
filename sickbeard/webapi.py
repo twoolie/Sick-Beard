@@ -74,6 +74,7 @@ class Api:
     def default(self, *args, **kwargs):
 
         self.apiKey = sickbeard.API_KEY
+        self.friendKey = sickbeard.FRIEND_KEY
         access, accessMsg, args, kwargs = self._grand_access(self.apiKey, args, kwargs)
 
         # set the output callback

@@ -41,7 +41,7 @@ from sickbeard import search_queue
 from sickbeard import image_cache
 from sickbeard import naming
 
-from sickbeard.providers import newznab
+from sickbeard.providers import newznab, friends
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
@@ -680,7 +680,7 @@ class ConfigGeneral:
 
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
-                    launch_browser=None, web_username=None, use_api=None, api_key=None,
+                    launch_browser=None, web_username=None, use_api=None, api_key=None, friend_key=None,
                     web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
 
         results = []
@@ -723,6 +723,7 @@ class ConfigGeneral:
 
         sickbeard.USE_API = use_api
         sickbeard.API_KEY = api_key
+        sickbeard.FRIEND_KEY = friend_key
         
         if enable_https == "on":
             enable_https = 1
@@ -995,6 +996,43 @@ class ConfigProviders:
 
         return '1'
 
+    @cherrypy.expose
+    def saveFriends(self, name, url, key=''):
+
+        if not name or not url:
+            return '0'
+
+        if not url.endswith('/'):
+            url = url + '/'
+
+        providerDict = dict(zip([x.name for x in sickbeard.friendList], sickbeard.friendList))
+
+        if name in providerDict:
+            if not providerDict[name].default:
+                providerDict[name].name = name
+                providerDict[name].url = url
+            providerDict[name].key = key
+
+            return providerDict[name].getID() + '|' + providerDict[name].configStr()
+
+        else:
+
+            newProvider = friends.FriendsProvider(name, url, key)
+            sickbeard.friendsList.append(newProvider)
+            return newProvider.getID() + '|' + newProvider.configStr()
+
+    @cherrypy.expose
+    def deleteFriend(self, id):
+
+        providerDict = dict(zip([x.getID() for x in sickbeard.friendList], sickbeard.friendList))
+
+        if id not in providerDict or providerDict[id].default:
+            return '0'
+
+        # delete it from the list
+        sickbeard.friendList.remove(providerDict[id])
+
+        return '1'
 
     @cherrypy.expose
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,

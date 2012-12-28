@@ -38,6 +38,16 @@ $(document).ready(function () {
                 $('#api_key').val(data).select();
             });
     });
+    $("#generate_new_friendkey").click(function () {
+        $.get(sbRoot + '/config/general/generateKey',
+            function (data) {
+                if (data.error != undefined) {
+                    alert(data.error);
+                    return;
+                }
+                $('#friend_key').val(data).select();
+            });
+    });
 
 });
 

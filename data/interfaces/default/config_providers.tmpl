@@ -273,6 +273,56 @@
                     </fieldset>
                 </div><!-- /component-group3 //-->
 
+                <div id="core-component-group4" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Configure Friend Links</h3>
+                        <p>Add and setup connections to friends.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title jumbo">Select Provider:</span>
+                                <span class="component-desc">
+                                    <input type="hidden" name="friend_string" id="friend_string" />
+                                    <select id="editAFriendProvider">
+                                        <option value="addFreind">-- add new friend link --</option>
+                                    </select>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="newznabProviderDiv" id="addFriend">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Friend Name</span>
+                                    <input class="component-desc" type="text" id="friend_name" size="40" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Friend URL</span>
+                                    <input class="component-desc" type="text" id="friend_url" size="40" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Friend Key</span>
+                                    <input class="component-desc" type="text" id="friend_key" size="40" />
+                                </label>
+                            </div>
+                            <div id="friend_add_div">
+                                <input type="button" class="btn friend_save" id="friend_add" value="Add" />
+                            </div>
+                            <div id="friend_update_div" style="display: none;">
+                                <input type="button" class="btn btn-danger newznab_delete" id="friend_delete" value="Delete" />
+                            </div>
+                        </div>
+
+                    </fieldset>
+                </div><!-- /component-group3 //-->
+
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />
                 </div><br />
