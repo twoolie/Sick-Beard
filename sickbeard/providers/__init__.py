@@ -27,6 +27,7 @@ __all__ = ['ezrss',
            ]
 
 import sickbeard
+import friends
 
 from os import sys
 
@@ -80,6 +81,14 @@ def getNewznabProviderList(data):
         
     return filter(lambda x: x, providerList)
 
+def getFriendsList(data):
+
+    providerList = filter(lambda x: x, [makeFriendsProvider(x) for x in data.split('!!!')])
+
+    providerDict = dict(zip([x.name for x in providerList], providerList))
+
+    return filter(lambda x: x, providerList)
+
 
 def makeNewznabProvider(configString):
 
@@ -88,10 +97,24 @@ def makeNewznabProvider(configString):
 
     name, url, key, enabled = configString.split('|')
 
-    newznab = sys.modules['sickbeard.providers.newznab']
+    from sickbeard.providers import newznab
 
     newProvider = newznab.NewznabProvider(name, url)
     newProvider.key = key
+    newProvider.enabled = enabled == '1'
+
+    return newProvider
+
+def makeFriendsProvider(configString):
+
+    if not configString:
+        return None
+
+    name, url, key, enabled = configString.split('|')
+
+    from sickbeard.providers import friends
+
+    newProvider = friends.FriendsProvider(name, url, key)
     newProvider.enabled = enabled == '1'
 
     return newProvider
