@@ -79,6 +79,7 @@ autoPostProcesserScheduler = None
 showList = None
 loadingShowList = None
 
+friendsList = []
 providerList = []
 newznabProviderList = []
 metadata_provider_dict = {}
@@ -103,6 +104,7 @@ WEB_IPV6 = None
 
 USE_API = False
 API_KEY = None
+FRIEND_KEY = None
 
 ENABLE_HTTPS = False
 HTTPS_CERT = None
@@ -304,8 +306,8 @@ def initialize(consoleLogging=True):
 
     with INIT_LOCK:
 
-        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
-                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
+        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, FRIEND_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
+                USE_NZBS, USE_TORRENTS, USE_FRIENDS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
@@ -326,7 +328,7 @@ def initialize(consoleLogging=True):
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, friendsList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
@@ -379,6 +381,7 @@ def initialize(consoleLogging=True):
 
         USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0)) 
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
+        FRIEND_KEY = check_setting_str(CFG, 'General', 'friend_key', '')
         
         ENABLE_HTTPS = bool(check_setting_int(CFG, 'General', 'enable_https', 0))
         
@@ -436,6 +439,7 @@ def initialize(consoleLogging=True):
 
         USE_NZBS = bool(check_setting_int(CFG, 'General', 'use_nzbs', 1))
         USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 0))
+        USE_FRIENDS = bool(check_setting_int(CFG, 'FRIENDS', 'use_friends', 1))
 
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
         if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget'):
@@ -463,7 +467,7 @@ def initialize(consoleLogging=True):
         EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
         if not EZRSS:
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
-            
+
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
@@ -653,6 +657,10 @@ def initialize(consoleLogging=True):
 
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
+
+        friendsData = check_setting_str(CFG, 'Friends', 'friend_data', '')
+        friendsList = providers.getFriendsList(friendsData)
+
         providerList = providers.makeProviderList()
 
         # start up all the threads
@@ -936,6 +944,7 @@ def save_config():
     new_config['General']['web_password'] = WEB_PASSWORD
     new_config['General']['use_api'] = int(USE_API)
     new_config['General']['api_key'] = API_KEY
+    new_config['General']['friend_key'] = FRIEND_KEY
     new_config['General']['enable_https'] = int(ENABLE_HTTPS)
     new_config['General']['https_cert'] = HTTPS_CERT
     new_config['General']['https_key'] = HTTPS_KEY
