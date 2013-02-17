@@ -14,100 +14,121 @@ $(document).ready(function(){
     } 
 
     $.fn.addProvider = function (id, name, url, key, isDefault, showProvider) {
+        var $this = $(this),
+            $componentGroup = $this.closest('.component-group'),
+            providerType = $this.data().providerType,
+            providerList = $componentGroup.data().providerList;
 
         if (url.match('/$') == null)
-            url = url + '/'
+            url = url + '/';
 
         var newData = [isDefault, [name, url, key]];
-        newznabProviders[id] = newData;
+        providerList[id] = newData;
 
         if (!isDefault)
         {
-            $('#editANewznabProvider').addOption(id, name);
-            $(this).populateNewznabSection();
+            $componentGroup.find('.editProvider').addOption(id, name);
+            $this.populateProviderSection();
         }
 
         if ($('#providerOrderList > #'+id).length == 0 && showProvider != false) {
-            var toAdd = '<li class="ui-state-default" id="'+id+'"> <input type="checkbox" id="enable_'+id+'" class="provider_enabler" CHECKED> <a href="'+url+'" class="imgLink" target="_new"><img src="'+sbRoot+'/images/providers/newznab.gif" alt="'+name+'" width="16" height="16"></a> '+name+'</li>'
+            var toAdd = '<li class="ui-state-default" id="'+id+'">'+
+                '<input type="checkbox" id="enable_'+id+'" class="provider_enabler" CHECKED>'+
+                '<a href="'+url+'" class="imgLink" target="_new">'+
+                    '<img src="'+sbRoot+'/images/providers/'+providerType+'.gif" alt="'+name+'" width="16" height="16">'+
+                '</a> '+name+'</li>'
 
             $('#providerOrderList').append(toAdd);
             $('#providerOrderList').sortable("refresh");
         }
 
-        $(this).makeNewznabProviderString();
+        $this.makeProviderString();
 
     }
 
     $.fn.updateProvider = function (id, url, key) {
+        var $this = $(this),
+            $componentGroup = $this.closest('.component-group'),
+            providerList = $componentGroup.data().providerList;
 
-        newznabProviders[id][1][1] = url;
-        newznabProviders[id][1][2] = key;
+        providerList[id][1][1] = url;
+        providerList[id][1][2] = key;
 
-        $(this).populateNewznabSection();
-
-        $(this).makeNewznabProviderString();
+        $this.populateProviderSection();
+        $this.makeProviderString();
     
     }
 
     $.fn.deleteProvider = function (id) {
-    
-        $('#editANewznabProvider').removeOption(id);
-        delete newznabProviders[id];
-        $(this).populateNewznabSection();
+        var $this = $(this),
+            $componentGroup = $this.closest('.component-group'),
+            providerList = $componentGroup.data().providerList;
+
+        $componentGroup.find('.editProvider').removeOption(id);
+        delete providerList[id];
+        $this.populateProviderSection();
 
         $('#providerOrderList > #'+id).remove();
 
-        $(this).makeNewznabProviderString();
+        $this.makeProviderString();
 
     }
 
-    $.fn.populateNewznabSection = function() {
+    $.fn.populateProviderSection = function() {
+        var $this = $(this),
+            $componentGroup = $this.closest('.component-group'),
+            providerList = $componentGroup.data().providerList;
 
-        var selectedProvider = $('#editANewznabProvider :selected').val();
+        var selectedProvider = $componentGroup.find('.editProvider :selected').val();
 
-        if (selectedProvider == 'addNewznab') {
+        if (selectedProvider == 'addProvider') {
             var data = ['','',''];
             var isDefault = 0;
-            $('#newznab_add_div').show();
-            $('#newznab_update_div').hide();
+            $componentGroup.find('.provider-add-div').show();
+            $componentGroup.find('.provider-update-div').hide();
         } else {
-            var data = newznabProviders[selectedProvider][1];
-            var isDefault = newznabProviders[selectedProvider][0];
-            $('#newznab_add_div').hide();
-            $('#newznab_update_div').show();
+            var data = providerList[selectedProvider][1];
+            var isDefault = providerList[selectedProvider][0];
+            $componentGroup.find('.provider-add-div').hide();
+            $componentGroup.find('.provider-update-div').show();
         }
 
-        $('#newznab_name').val(data[0]);
-        $('#newznab_url').val(data[1]);
-        $('#newznab_key').val(data[2]);
+        $componentGroup.find('.provider-name').val(data[0]);
+        $componentGroup.find('.provider-url').val(data[1]);
+        $componentGroup.find('.provider-key').val(data[2]);
         
-        if (selectedProvider == 'addNewznab') {
-            $('#newznab_name').removeAttr("disabled");
-            $('#newznab_url').removeAttr("disabled");
+        if (selectedProvider == 'addProvider') {
+            $componentGroup.find('.provider-name').removeAttr("disabled");
+            $componentGroup.find('.provider-url').removeAttr("disabled");
         } else {
 
-            $('#newznab_name').attr("disabled", "disabled");
+            $componentGroup.find('.provider-name').attr("disabled", "disabled");
 
             if (isDefault) {
-                $('#newznab_url').attr("disabled", "disabled");
-                $('#newznab_delete').attr("disabled", "disabled");
+                $componentGroup.find('.provider-url').attr("disabled", "disabled");
+                $componentGroup.find('.provider-delete').attr("disabled", "disabled");
             } else {
-                $('#newznab_url').removeAttr("disabled");
-                $('#newznab_delete').removeAttr("disabled");
+                $componentGroup.find('.provider-url').removeAttr("disabled");
+                $componentGroup.find('.provider-delete').removeAttr("disabled");
             }
         }
 
     }
     
-    $.fn.makeNewznabProviderString = function() {
+    $.fn.makeProviderString = function() {
+        var $this = $(this),
+            $componentGroup = $this.closest('.component-group'),
+            providerList = $componentGroup.data().providerList;
 
         var provStrings = new Array();
         
-        for (var id in newznabProviders) {
-            provStrings.push(newznabProviders[id][1].join('|'));
+        for (var id in providerList) {
+            provStrings.push(providerList[id][1].join('|'));
         }
 
-        $('#newznab_string').val(provStrings.join('!!!'))
+        var outstring = provStrings.join('!!!');
+        console.log(outstring);
+        $componentGroup.find('.provider-string').val(outstring)
 
     }
     
@@ -122,7 +143,11 @@ $(document).ready(function(){
             $("#provider_order").val(finalArr.join(' '));
     }
 
-    var newznabProviders = new Array();
+    $('[data-provider-type]').each(function(i,item){
+        $(item).data({providerList: new Array()})
+    })
+//    var newznabProviders = new Array();
+//    var friendProviders = new Array()
 
     $('.newznab_key').change(function(){
 
@@ -136,14 +161,17 @@ $(document).ready(function(){
 
     });
     
-    $('#newznab_key').change(function(){
-        
-        var selectedProvider = $('#editANewznabProvider :selected').val();
+    $('input.provider-info').change(function(){
+        var $this = $(this),
+            $componentGroup = $this.closest('.component-group'),
+            providerList = $componentGroup.data().providerList;
 
-        var url = $('#newznab_url').val();
-        var key = $('#newznab_key').val();
+        var selectedProvider = $componentGroup.find('.editProvider :selected').val();
+
+        var url = $componentGroup.find('.provider-url').val();
+        var key = $componentGroup.find('.provider-key').val();
         
-        $(this).updateProvider(selectedProvider, url, key);
+        $this.updateProvider(selectedProvider, url, key);
         
     });
     
@@ -152,7 +180,7 @@ $(document).ready(function(){
     });
 
     $('#editANewznabProvider').change(function(){
-        $(this).populateNewznabSection();
+        $(this).populateProviderSection();
     });
     
     $('.provider_enabler').live('click', function(){

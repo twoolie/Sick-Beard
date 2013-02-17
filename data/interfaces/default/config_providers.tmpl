@@ -16,7 +16,7 @@
 \$(document).ready(function(){
     var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
-    \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
+    \$("#editANewznabProvider").addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
 #end for
 });
 //-->
@@ -126,6 +126,22 @@
                         </div>
                     </div><!-- /${curNewznabProvider.getID()}Div //-->
 #end for
+#for $curFriendsProvider in [$curProvider for $curProvider in $sickbeard.friendsProviderList if $curProvider.default]:
+                    <div class="providerDiv" id="${curFriendsProvider.getID()}Div">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">$curFriendsProvider.name URL</span>
+                                <input class="component-desc" type="text" id="${curFriendsProvider.getID()}_url" value="$curFriendsProvider.url" size="40" disabled />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">$curNewznabProvider.name API Key</span>
+                                <input class="component-desc friend_key" type="text" id="${curFriendsProvider.getID()}_hash" value="$curFriendsProvider.key" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /${curFriendsProvider.getID()}Div //-->
+#end for
 <!--
                     <div class="providerDiv" id="nzbs_orgDiv">
                         <div class="field-pair">
@@ -218,7 +234,7 @@
                     </fieldset>
                 </div><!-- /component-group2 //-->
 
-                <div id="core-component-group3" class="component-group clearfix">
+                <div id="core-component-group3" class="component-group clearfix" data-provider-type='newznab'>
 
                     <div class="component-group-desc">
                         <h3>Configure Custom Newznab Providers</h3>
@@ -231,53 +247,54 @@
                             <label class="clearfix">
                                 <span class="component-title jumbo">Select Provider:</span>
                                 <span class="component-desc">
-                                    <input type="hidden" name="newznab_string" id="newznab_string" />
-                                    <select id="editANewznabProvider">
-                                        <option value="addNewznab">-- add new provider --</option>
+                                    <input type="hidden" name="newznab_string" class='provider-string' id="newznab_string" />
+                                    <select id="editANewznabProvider" class='editProvider'>
+                                        <option value="addProvider">-- add new provider --</option>
                                     </select>
                                 </span>
                             </label>
                         </div>
 
-<div class="newznabProviderDiv" id="addNewznab">
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Provider Name</span>
-                                <input class="component-desc" type="text" id="newznab_name" size="40" />
-                            </label>
+                        <div class="newznabProviderDiv" id="addNewznab">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Provider Name</span>
+                                    <input class="component-desc provider-info provider-name" type="text" id="newznab_name" size="40" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Site URL</span>
+                                    <input class="component-desc provider-info provider-url" type="text" id="newznab_url" size="40" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">API Key</span>
+                                    <input class="component-desc provider-info provider-key" type="text" id="newznab_key" size="40" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">(leave blank if not required)</span>
+                                </label>
+                            </div>
+                            <div id="newznab_add_div" class='provider-add-div'>
+                                <input type="button" class="btn newznab_save" id="newznab_add" value="Add" />
+                            </div>
+                            <div id="newznab_update_div" class='provider-update-div' style="display: none;">
+                                <input type="button" class="btn btn-danger newznab_delete provider-delete" id="newznab_delete" value="Delete" />
+                            </div>
                         </div>
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Site URL</span>
-                                <input class="component-desc" type="text" id="newznab_url" size="40" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">API Key</span>
-                                <input class="component-desc" type="text" id="newznab_key" size="40" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">(leave blank if not required)</span>
-                            </label>
-                        </div>
-            <div id="newznab_add_div">
-                <input type="button" class="btn newznab_save" id="newznab_add" value="Add" />
-            </div>
-            <div id="newznab_update_div" style="display: none;">
-                <input type="button" class="btn btn-danger newznab_delete" id="newznab_delete" value="Delete" />
-            </div> 
-</div>
 
                     </fieldset>
                 </div><!-- /component-group3 //-->
 
-                <div id="core-component-group4" class="component-group clearfix">
+                <div id="core-component-group4" class="component-group clearfix" data-provider-type='friends'>
 
                     <div class="component-group-desc">
                         <h3>Configure Friend Links</h3>
                         <p>Add and setup connections to friends.</p>
+                        <p>Setup your key on the general page.</p>
                     </div>
 
                     <fieldset class="component-group-list">
@@ -286,42 +303,42 @@
                                 <span class="component-title jumbo">Select Provider:</span>
                                 <span class="component-desc">
                                     <input type="hidden" name="friend_string" id="friend_string" />
-                                    <select id="editAFriendProvider">
-                                        <option value="addFreind">-- add new friend link --</option>
+                                    <select id="editAFriendProvider" class='editProvider'>
+                                        <option value="addProvider">-- add new friend link --</option>
                                     </select>
                                 </span>
                             </label>
                         </div>
 
-                        <div class="newznabProviderDiv" id="addFriend">
+                        <div class="friendsProviderDiv" id="addFriend">
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Friend Name</span>
-                                    <input class="component-desc" type="text" id="friend_name" size="40" />
+                                    <input class="component-desc provider-info provider-name" type="text" id="friend_name" size="40" />
                                 </label>
                             </div>
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Friend URL</span>
-                                    <input class="component-desc" type="text" id="friend_url" size="40" />
+                                    <input class="component-desc provider-info provider-url" type="text" id="friend_url" size="40" />
                                 </label>
                             </div>
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Friend Key</span>
-                                    <input class="component-desc" type="text" id="friend_key" size="40" />
+                                    <input class="component-desc provider-info provider-key" type="text" id="friend_key" size="40" />
                                 </label>
                             </div>
-                            <div id="friend_add_div">
+                            <div id="friend_add_div" class='provider-add-div'>
                                 <input type="button" class="btn friend_save" id="friend_add" value="Add" />
                             </div>
-                            <div id="friend_update_div" style="display: none;">
-                                <input type="button" class="btn btn-danger newznab_delete" id="friend_delete" value="Delete" />
+                            <div id="friend_update_div" class='provider-update-div' style="display: none;">
+                                <input type="button" class="btn btn-danger friend_delete provider-delete" id="friend_delete" value="Delete" />
                             </div>
                         </div>
 
                     </fieldset>
-                </div><!-- /component-group3 //-->
+                </div><!-- /component-group4 //-->
 
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />

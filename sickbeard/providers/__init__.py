@@ -85,7 +85,7 @@ def getFriendsList(data):
 
     providerList = filter(lambda x: x, [makeFriendsProvider(x) for x in data.split('!!!')])
 
-    providerDict = dict(zip([x.name for x in providerList], providerList))
+    #providerDict = {x.name : x for x in providerList}
 
     return filter(lambda x: x, providerList)
 
