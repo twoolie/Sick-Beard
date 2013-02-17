@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble
+from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, friends, womble
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -80,9 +80,9 @@ autoPostProcesserScheduler = None
 showList = None
 loadingShowList = None
 
-friendsList = []
 providerList = []
 newznabProviderList = []
+friendsProviderList = []
 metadata_provider_dict = {}
 
 NEWEST_VERSION = None
@@ -452,9 +452,6 @@ def initialize(consoleLogging=True):
             CheckSection(CFG, 'EZRSS')
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
 
-<<<<<<< HEAD
-        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
-=======
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
@@ -526,6 +523,11 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'Newznab')
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
+
+        CheckSection(CFG, 'Friends')
+        friendsData = check_setting_str(CFG, 'Friends', 'friends_data', '')
+        friendsProviderList = providers.getFriendsList(friendsData)
+
         providerList = providers.makeProviderList()
 
         CheckSection(CFG, 'Blackhole')
@@ -534,7 +536,6 @@ def initialize(consoleLogging=True):
 
         CheckSection(CFG, 'TVTORRENTS')
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
->>>>>>> 4e5762579c1efd6d810321364bfe4d21c4b0dc9a
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
 
@@ -674,86 +675,7 @@ def initialize(consoleLogging=True):
         NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
         NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
 
-<<<<<<< HEAD
-        GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
-        IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
-
-        EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
-
-        USE_BANNER = bool(check_setting_int(CFG, 'General', 'use_banner', 0))
-        USE_LISTVIEW = bool(check_setting_int(CFG, 'General', 'use_listview', 0))
-        METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', '')
-
-        metadata_provider_dict = metadata.get_metadata_generator_dict()
-        
-        # if this exists it's legacy, use the info to upgrade metadata to the new settings
-        if METADATA_TYPE:
-
-            old_metadata_class = None
-
-            if METADATA_TYPE == 'xbmc':
-                old_metadata_class = metadata.xbmc.metadata_class
-            elif METADATA_TYPE == 'mediabrowser':
-                old_metadata_class = metadata.mediabrowser.metadata_class
-            elif METADATA_TYPE == 'ps3':
-                old_metadata_class = metadata.ps3.metadata_class
-        
-            if old_metadata_class:
-                
-                METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
-                METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
-            
-                ART_POSTER = bool(check_setting_int(CFG, 'General', 'art_poster', 1))
-                ART_FANART = bool(check_setting_int(CFG, 'General', 'art_fanart', 1))
-                ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
-                ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_season_thumbnails', 1))
-
-                new_metadata_class = old_metadata_class(METADATA_SHOW,
-                                                        METADATA_EPISODE,
-                                                        ART_POSTER,
-                                                        ART_FANART,
-                                                        ART_THUMBNAILS,
-                                                        ART_SEASON_THUMBNAILS)
-                
-                metadata_provider_dict[new_metadata_class.name] = new_metadata_class
-
-        # this is the normal codepath for metadata config
-        else:
-            METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
-            METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
-            METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0')
-            METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
-            METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0')
-            METADATA_SYNOLOGY = check_setting_str(CFG, 'General', 'metadata_synology', '0|0|0|0|0|0')
-
-            for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
-                                       (METADATA_MEDIABROWSER, metadata.mediabrowser),
-                                       (METADATA_PS3, metadata.ps3),
-                                       (METADATA_WDTV, metadata.wdtv),
-                                       (METADATA_TIVO, metadata.tivo),
-                                       (METADATA_SYNOLOGY, metadata.synology),
-                                       ]:
-
-                (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
-                tmp_provider = cur_metadata_class.metadata_class()
-                tmp_provider.set_config(cur_metadata_config)
-                metadata_provider_dict[tmp_provider.name] = tmp_provider
-
-        COMING_EPS_LAYOUT = check_setting_str(CFG, 'GUI', 'coming_eps_layout', 'banner')
-        COMING_EPS_DISPLAY_PAUSED = bool(check_setting_int(CFG, 'GUI', 'coming_eps_display_paused', 0))
-        COMING_EPS_SORT = check_setting_str(CFG, 'GUI', 'coming_eps_sort', 'date')
-
-        newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
-        newznabProviderList = providers.getNewznabProviderList(newznabData)
-
-        friendsData = check_setting_str(CFG, 'Friends', 'friend_data', '')
-        friendsProviderList = providers.getFriendsList(friendsData)
-
-        providerList = providers.makeProviderList()
-
-=======
->>>>>>> 4e5762579c1efd6d810321364bfe4d21c4b0dc9a
         # start up all the threads
         logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 
@@ -1230,6 +1152,9 @@ def save_config():
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
+
+    new_config['Friends'] = {}
+    new_config['Friends']['friends_data'] = '!!!'.join([x.configStr() for x in friendsList])
 
     new_config['GUI'] = {}
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
